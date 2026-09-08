@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCS EQ & EI Personal Growth Assessment • Version 3</title>
+<style>
+:root{--ink:#172033;--muted:#657085;--line:#dfe4ec;--bg:#f5f7fb;--card:#fff;--accent:#3157d5;--accent2:#eef2ff;--good:#177245;--warn:#a15c00}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+.container{max-width:920px;margin:auto;padding:24px}
+.hero{background:linear-gradient(135deg,#18213d,#3157d5);color:#fff;border-radius:22px;padding:34px;margin-bottom:20px}
+.hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:7px 0;opacity:.92}.hero-message{font-size:19px;font-weight:800;margin-top:18px!important;max-width:760px}.designer{font-weight:800;font-size:15px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin:18px 0;box-shadow:0 6px 22px rgba(20,30,60,.05)}
+h2{margin-top:0}.small{font-size:13px;color:var(--muted)}
+label{display:block;font-weight:600;margin:8px 0 5px}
+input[type=text],input[type=number],textarea{width:100%;padding:12px;border:1px solid #cfd6e2;border-radius:10px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+.q{padding:20px 0;border-top:1px solid var(--line)}.q:first-child{border-top:0}
+.q-title{font-weight:700;margin-bottom:12px}
+.option{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid #d8deea;border-radius:10px;margin:8px 0;cursor:pointer}
+.option:hover{background:#fafbff}.option input{margin-top:4px}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--accent2);color:var(--accent);font-size:12px;font-weight:700}
+button{border:0;border-radius:12px;padding:13px 20px;font-weight:700;font-size:15px;cursor:pointer;background:var(--accent);color:white}
+button.secondary{background:#e9edf5;color:var(--ink)}button.print{background:#177245}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.hidden{display:none}
+.result-head{text-align:center;padding:18px}.score{font-size:54px;font-weight:800;color:var(--accent)}
+.level{font-size:20px;font-weight:800;margin:6px 0 12px}
+.bars{margin-top:18px}.barrow{margin:15px 0}.barlabel{display:flex;justify-content:space-between;font-weight:700}.bar{height:11px;background:#e8ebf1;border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--accent)}
+.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.mini{border:1px solid var(--line);border-radius:14px;padding:16px}
+.mini h3{margin:0 0 6px}.mantra{font-size:22px;font-weight:800;text-align:center;padding:24px;background:#f0f4ff;border-radius:16px}
+.note{background:#fff8e8;border-left:4px solid #e1a52b;padding:13px 15px;border-radius:8px}
+@media(max-width:650px){.container{padding:12px}.hero{padding:24px}.hero h1{font-size:26px}.result-grid{grid-template-columns:1fr}}
+@media print{body{background:white}.no-print{display:none!important}.card{box-shadow:none;break-inside:avoid}.hero{color:#000;background:none;padding:0}.result-head{padding-top:0}}
+</style>
+</head>
+<body>
+<div class="container">
+  <section class="hero">
+    <div class="badge" style="background:rgba(255,255,255,.16);color:#fff">MCS • Personal Development</div>
+    <h1>Emotional Intelligence & Personal Growth Assessment</h1>
+    <p>Understand your emotional patterns, interpersonal judgement and opportunities to grow in your CA journey and personal life.</p>
+    <p class="hero-message">“This assessment is not here to tell you who you are. It is here to show you where you can grow.”</p>
+    <p class="designer">Designed by CA Inderpreet Kaur</p>
+    <p class="small" style="color:#dbe4ff">Educational self-assessment for reflection and professional development. Not a clinical or psychological diagnosis.</p>
+  </section>
+
+  <div id="intro" class="card">
+    <h2>Before you begin</h2>
+    <p>Answer as honestly as possible. There are no marks for choosing what sounds socially perfect. Some questions ask how you usually behave; others ask you to choose the most effective response to a workplace or personal situation.</p><p><b>35 scored prompts + 5 reflection prompts.</b> Your report is private and designed for self-development.</p>
+    <div class="note"><b>Your purpose:</b> This assessment is not here to tell you who you are. It is here to show you where you can grow.<br><br>
+Your report separates <b>Self-Perceived EQ</b> from <b>Situational EI</b>. Use the result privately as a mirror, not as a label.</div>
+    <label for="studentName">Name</label>
+    <input id="studentName" type="text" maxlength="80" placeholder="Enter your name">
+    <label for="studentId">Roll No. / Student ID (optional)</label>
+    <input id="studentId" type="text" maxlength="30" placeholder="Enter roll number">
+    <div class="actions"><button onclick="startAssessment()">Start Assessment</button></div>
+  </div>
+
+  <form id="assessment" class="hidden">
+    <div id="questions"></div>
+    <div class="card">
+      <h2>Reflection</h2>
+      <p class="small">These reflections are for your learning. They are not included in the numerical score.</p>
+      <label>Which emotional situation do you most want to handle better?</label>
+      <textarea id="reflection1" maxlength="800"></textarea>
+      <label>What is one interpersonal habit you would like to improve?</label>
+      <textarea id="reflection2" maxlength="800"></textarea>
+      <div class="actions"><button type="submit">See My Personal Report</button></div>
+    </div>
+  </form>
+
+  <section id="result" class="hidden"></section>
+</div>
+
+<script>
+const dimensions = {
+  SA:"Self-Awareness",
+  SR:"Self-Regulation",
+  EM:"Empathy & Social Awareness",
+  RM:"Relationship Management",
+  DM:"Emotionally Informed Decision-Making"
+};
+
+const likert = [
+  ["Never / almost never",1],["Rarely",2],["Sometimes",3],["Often",4],["Almost always",5]
+];
+
+/*
+  Scoring architecture:
+  - Q1-Q15: self-report. Each response maps 1..5 to a dimension.
+  - Q16-Q25: situational judgement. Each option has a 0..4 effectiveness score
+    plus dimension weights. This is a classroom SJT, not a proprietary test.
+  - Q26-Q30: optional reflection prompts, not scored.
+  - Self-perceived EQ = normalized Q1-Q15.
+  - Situational EI = normalized Q16-Q25.
+  - Overall developmental index = 40% self-perception + 60% situational judgement.
+  - Dimension score = 45% self-report + 55% SJT where both exist.
+*/
+
+const questions = [
+ {id:1,type:"self",dim:"SA",text:"I can usually name the emotion I am experiencing before I react to a situation."},
+ {id:2,type:"self",dim:"SA",text:"I notice the situations or people that tend to trigger strong emotional reactions in me."},
+ {id:3,type:"self",dim:"SA",text:"I can tell when my mood is affecting the way I communicate with others."},
+ {id:4,type:"self",dim:"SR",text:"When I am angry or frustrated, I can pause before responding."},
+ {id:5,type:"self",dim:"SR",text:"I can remain professional when someone criticises me unfairly."},
+ {id:6,type:"self",dim:"SR",text:"Under pressure, I can change my response instead of simply reacting automatically."},
+ {id:7,type:"self",dim:"EM",text:"I can usually notice when another person is uncomfortable even if they do not say it directly."},
+ {id:8,type:"self",dim:"EM",text:"Before judging someone's behaviour, I try to understand what may be happening from their perspective."},
+ {id:9,type:"self",dim:"EM",text:"I adjust my communication when I realise another person needs a different approach."},
+ {id:10,type:"self",dim:"RM",text:"I can disagree with someone without making the disagreement personal."},
+ {id:11,type:"self",dim:"RM",text:"I can give difficult feedback while preserving the other person's dignity."},
+ {id:12,type:"self",dim:"RM",text:"When conflict occurs, I focus on solving the issue rather than winning the argument."},
+ {id:13,type:"self",dim:"DM",text:"When emotionally upset, I can delay an important decision until I can think more clearly."},
+ {id:14,type:"self",dim:"DM",text:"I consider both facts and emotional consequences before making an important interpersonal decision."},
+ {id:15,type:"self",dim:"DM",text:"I can recognise when my personal assumptions are influencing my judgement."},
+
+ {id:16,type:"sjt",dim:"SR",case:"You have submitted a report and your manager says in front of colleagues, “This is full of mistakes. How could you submit this?” You believe some criticism is justified, but the tone embarrasses you.",text:"What is the most effective immediate response?",opts:[
+  ["Defend yourself immediately and explain every reason for the errors.",1],
+  ["Stay completely silent and accept everything said.",2],
+  ["Pause, acknowledge the concern and ask which specific issues should be corrected first.",4],
+  ["Tell the manager their behaviour is unacceptable and leave.",1]
+ ]},
+ {id:17,type:"sjt",dim:"EM",case:"A teammate who is normally talkative becomes unusually quiet during a group discussion. You notice they avoid eye contact when their part of the project is mentioned.",text:"What is the strongest response?",opts:[
+  ["Assume they are unprepared and move on.",1],
+  ["Ask privately whether everything is okay and give them space to explain.",4],
+  ["Call attention to their silence so the group can help.",2],
+  ["Take over their task without asking.",2]
+ ]},
+ {id:18,type:"sjt",dim:"RM",case:"A colleague disagrees strongly with your proposal and says, “You clearly haven't thought this through.”",text:"What response is most likely to keep the discussion productive?",opts:[
+  ["“You clearly haven't understood my proposal.”",1],
+  ["Say nothing and stop contributing.",2],
+  ["“Let's separate the idea from the person. Which part do you think needs improvement?”",4],
+  ["Immediately involve the manager.",2]
+ ]},
+ {id:19,type:"sjt",dim:"DM",case:"You receive an email from a client that feels rude and dismissive. You are already stressed because of a deadline.",text:"What should you do first?",opts:[
+  ["Reply immediately so the client knows you will not tolerate the tone.",1],
+  ["Forward it to a colleague and complain about the client.",1],
+  ["Pause, identify what is factual versus what you are emotionally inferring, then draft a professional response.",4],
+  ["Ignore the email until the client follows up again.",2]
+ ]},
+ {id:20,type:"sjt",dim:"SR",case:"You discover that a teammate received credit for work you substantially contributed to.",text:"What is the most emotionally intelligent first step?",opts:[
+  ["Confront them in front of the team.",1],
+  ["Say nothing and become distant.",2],
+  ["Allow yourself to cool down, then discuss the contribution privately using facts and specific examples.",4],
+  ["Post about the situation in the group chat.",1]
+ ]},
+ {id:21,type:"sjt",dim:"EM",case:"A junior colleague makes a mistake and says, “I am probably just not good at this.” You are under time pressure.",text:"What is the best response?",opts:[
+  ["“Then you need to work harder.”",1],
+  ["Fix it yourself and move on.",2],
+  ["Acknowledge the pressure, address the specific mistake and help them identify the next step.",4],
+  ["Tell them not to be emotional.",1]
+ ]},
+ {id:22,type:"sjt",dim:"RM",case:"Two members of your team are arguing. Both privately tell you that the other person is the problem.",text:"What should you do?",opts:[
+  ["Choose the person you trust more.",1],
+  ["Tell them both to stop arguing.",2],
+  ["Hear both perspectives, identify the shared issue and agree on specific behaviours going forward.",4],
+  ["Avoid involvement unless the manager asks.",2]
+ ]},
+ {id:23,type:"sjt",dim:"DM",case:"You are offered an opportunity that would look excellent on your CV, but it would also create a serious workload problem for the next three months.",text:"Which approach best reflects emotionally informed decision-making?",opts:[
+  ["Accept immediately because career opportunities should never be refused.",2],
+  ["Reject immediately because the workload feels uncomfortable.",2],
+  ["Assess the facts, your priorities, likely stress cost and alternatives before deciding.",4],
+  ["Ask a friend to decide for you.",1]
+ ]},
+ {id:24,type:"sjt",dim:"SA",case:"After a difficult meeting, you feel unusually irritated with everyone for the rest of the day.",text:"What is the most useful self-awareness response?",opts:[
+  ["Assume everyone else is being difficult.",1],
+  ["Notice the emotional carry-over and consider whether the meeting changed your interpretation of later events.",4],
+  ["Suppress the feeling and continue without reflection.",2],
+  ["Send a message to everyone explaining how annoyed you are.",1]
+ ]},
+ {id:25,type:"sjt",dim:"RM",case:"You need to tell a friend and colleague that their repeated interruptions are affecting your ability to work.",text:"Which statement is most effective?",opts:[
+  ["“You always interrupt me. You are very inconsiderate.”",1],
+  ["“It's fine, don't worry about it.”",2],
+  ["“I want to discuss something. When I am interrupted repeatedly, I lose my train of thought. Can we agree on a better way to handle discussions?”",4],
+  ["Stop responding to them for a few days.",1]
+ ]},
+ {id:31,type:"sjt",dim:"RM",case:"A senior asks you to stay late for a non-urgent task. You already have a committed deadline tomorrow morning.",text:"Which response is most assertive?",opts:[
+  ["“No. I have my own work.”",1],
+  ["“Sure, I will do it,” even though you know the deadline will suffer.",2],
+  ["“I can help, but I need to protect tomorrow morning's deadline. Which task should take priority?”",4],
+  ["“Why do you always give me extra work?”",1]
+ ]},
+ {id:32,type:"sjt",dim:"EM",case:"A colleague gives a very short reply to your message. You feel they may be upset with you.",text:"What is the most perception-aware response?",opts:[
+  ["Assume they are upset and become equally distant.",1],
+  ["Ask a mutual colleague what they think happened.",2],
+  ["Notice the assumption, avoid mind-reading and check directly if the issue matters.",4],
+  ["Send a long message explaining yourself before they accuse you.",1]
+ ]},
+ {id:33,type:"sjt",dim:"SA",case:"During a presentation, someone challenges your calculation. You immediately feel embarrassed and notice your voice becoming defensive.",text:"What is the strongest response?",opts:[
+  ["Argue that your calculation is correct before checking it.",1],
+  ["Say, “Let me verify the figure and come back to that point.”",4],
+  ["Stop speaking for the rest of the presentation.",2],
+  ["Say, “You should have told me this earlier.”",1]
+ ]},
+ {id:34,type:"sjt",dim:"DM",case:"You hear that a senior may be unhappy with your performance. You have not heard this directly from them.",text:"What is the most emotionally intelligent approach?",opts:[
+  ["Start changing your behaviour based on the rumour.",1],
+  ["Confront the person who spread the information.",2],
+  ["Treat it as unverified information and, if relevant, seek direct constructive feedback.",4],
+  ["Assume the rumour is false and ignore all feedback.",2]
+ ]},
+ {id:35,type:"sjt",dim:"RM",case:"You are in a disagreement with a family member. Both of you are becoming louder.",text:"What is the most effective next move?",opts:[
+  ["Speak louder so your point is heard.",1],
+  ["Leave without explaining and refuse to discuss it again.",2],
+  ["Pause the conversation respectfully and return when both of you can listen.",4],
+  ["Bring up several old disagreements to prove your point.",1]
+ ]},
+
+ {id:26,type:"reflection",text:"Think of a recent situation in which your emotions affected your behaviour. What happened?"},
+ {id:27,type:"reflection",text:"Which emotional trigger is most likely to affect your communication?"},
+ {id:28,type:"reflection",text:"What kind of feedback is hardest for you to receive?"},
+ {id:29,type:"reflection",text:"When you disagree with someone senior, what do you usually do?"},
+ {id:30,type:"reflection",text:"What is one interpersonal habit you want to change in the next 30 days?"}
+];
+
+function renderQuestions(){
+  const box=document.getElementById("questions");
+  let html="";
+  questions.forEach((q,i)=>{
+    if(q.type==="reflection") return;
+    html += `<div class="card q"><span class="badge">${q.type==="self"?"PART A • SELF-PERCEPTION":"PART B • CASE JUDGEMENT"}</span>`;
+    if(q.case) html += `<p><b>Case:</b> ${q.case}</p>`;
+    html += `<div class="q-title">${i+1}. ${q.text}</div>`;
+    if(q.type==="self"){
+      likert.forEach((o,j)=>{html += `<label class="option"><input required type="radio" name="q${q.id}" value="${o[1]}"> ${o[0]}</label>`});
+    } else {
+      q.opts.forEach((o,j)=>{html += `<label class="option"><input required type="radio" name="q${q.id}" value="${o[1]}"> ${o[0]}</label>`});
+    }
+    html += `</div>`;
+  });
+  box.innerHTML=html;
+}
+renderQuestions();
+
+function startAssessment(){
+  const n=document.getElementById("studentName").value.trim();
+  if(!n){alert("Please enter your name before starting.");return;}
+  document.getElementById("intro").classList.add("hidden");
+  document.getElementById("assessment").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function scoreAssessment(){
+  const self={}, sjt={}, counts={};
+  Object.keys(dimensions).forEach(d=>{self[d]=0;sjt[d]=0;counts[d]={self:0,sjt:0}});
+  questions.forEach(q=>{
+    if(q.type==="self"||q.type==="sjt"){
+      const el=document.querySelector(`input[name="q${q.id}"]:checked`);
+      const val=el?Number(el.value):0;
+      if(q.type==="self"){self[q.dim]+=val;counts[q.dim].self++;}
+      else {
+        // Situational answers are mapped to a primary skill and, where useful,
+        // secondary competencies to reflect the interconnected nature of EI.
+        const secondary={
+          16:["SR","RM"],17:["EM","RM"],18:["RM","EM"],19:["DM","SR"],20:["SR","RM"],
+          21:["EM","RM"],22:["RM","EM"],23:["DM","SR"],24:["SA","SR"],25:["RM","SR"],
+          31:["RM","SR"],32:["EM","SA"],33:["SA","SR"],34:["DM","EM"],35:["RM","SR"]
+        };
+        sjt[q.dim]+=val; counts[q.dim].sjt++;
+        const secs=secondary[q.id]||[];
+        secs.forEach(d=>{ if(d!==q.dim){ sjt[d]+=val*.35; counts[d].sjt+=.35; }});
+      }
+    }
+  });
+  const selfDim={},sjtDim={},finalDim={};
+  Object.keys(dimensions).forEach(d=>{
+    selfDim[d]=counts[d].self?Math.round((self[d]/(counts[d].self*5))*100):0;
+    sjtDim[d]=counts[d].sjt?Math.round((sjt[d]/(counts[d].sjt*4))*100):0;
+    const parts=[];
+    if(counts[d].self) parts.push([selfDim[d],.45]);
+    if(counts[d].sjt) parts.push([sjtDim[d],.55]);
+    finalDim[d]=Math.round(parts.reduce((a,x)=>a+x[0]*x[1],0));
+  });
+  const selfAll=Object.values(selfDim).reduce((a,b)=>a+b,0)/5;
+  const sjtAll=Object.values(sjtDim).reduce((a,b)=>a+b,0)/5;
+  const overall=Math.round(selfAll*.35+sjtAll*.65);
+  const profile=Object.entries(finalDim).sort((a,b)=>b[1]-a[1]);
+  return {selfDim,sjtDim,finalDim,selfAll:Math.round(selfAll),sjtAll:Math.round(sjtAll),overall,profile};
+}
+
+function level(score){
+  if(score>=85)return["Emotionally Intelligent Strength","You show a strong foundation for recognising emotions, managing responses and handling interpersonal situations effectively."];
+  if(score>=70)return["Strong Foundation","You generally use emotionally effective behaviours, with a few areas where deliberate practice can make you more consistent."];
+  if(score>=55)return["Developing","You have useful EI resources, but pressure, conflict or assumptions may sometimes influence your responses."];
+  if(score>=40)return["Needs Attention","Your responses suggest several opportunities to strengthen emotional awareness, regulation and interpersonal effectiveness."];
+  return["High Development Opportunity","Your responses suggest that focused practice in emotional awareness and interpersonal behaviour could be especially valuable."];
+}
+
+function hashCode(str){
+  let h=2166136261;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0);
+}
+
+const mantraTemplates = {
+ SA:[
+  "I pause long enough to understand what I am feeling before I decide what it means.",
+  "My emotions give me information; I choose to read the message before I act.",
+  "I notice my inner reaction without letting it write my outer behaviour."
+ ],
+ SR:[
+  "I do not have to answer every emotion immediately; I can choose my response.",
+  "A pause is not weakness. It is the space where my professional response is built.",
+  "I can feel strongly and still respond deliberately."
+ ],
+ EM:[
+  "I can understand another person's experience without having to agree with it.",
+  "Curiosity comes before judgement; I ask, listen and then respond.",
+  "I make room for the story behind the behaviour."
+ ],
+ RM:[
+  "I can be clear without being harsh and assertive without becoming aggressive.",
+  "The goal of a difficult conversation is not to win; it is to make the relationship and the issue clearer.",
+  "I protect both the message and the dignity of the person receiving it."
+ ],
+ DM:[
+  "I let facts and feelings both speak, but neither gets to make the decision alone.",
+  "Before an important decision, I separate what happened from what I am assuming.",
+  "Clarity grows when I give emotion a voice without giving it the steering wheel."
+ ]
+};
+
+function makeMantra(name,r){
+  const dims=Object.keys(r.finalDim).sort((a,b)=>r.finalDim[a]-r.finalDim[b]);
+  const focus=dims[0], strength=dims[dims.length-1];
+  const gap=r.selfAll-r.sjtAll;
+  const openings={
+    SA:"I can notice what is happening inside me before I decide what it means.",
+    SR:"I can give myself a pause between feeling and responding.",
+    EM:"I can replace quick judgement with curiosity.",
+    RM:"I can be clear, respectful and firm at the same time.",
+    DM:"I can let facts and feelings inform me without letting either take over."
+  };
+  const bridges={
+    SA:"My self-awareness becomes stronger when I turn observation into a deliberate choice.",
+    SR:"My strength is not the absence of emotion; it is the ability to choose my behaviour while emotion is present.",
+    EM:"Understanding another person does not require agreement, only the willingness to look again.",
+    RM:"The quality of my relationships grows when my message is clear and the other person's dignity remains intact.",
+    DM:"Clarity begins when I separate what I know from the story my mind has added."
+  };
+  const endings=[
+    "One thoughtful pause can change the entire conversation.",
+    "I do not need a perfect response, only a more intentional one.",
+    "Small changes in response create large changes in professional and personal relationships.",
+    "I can practise this skill until it becomes part of how I naturally show up.",
+    "My next level is not a new personality; it is a better choice at the right moment."
+  ];
+  const seed=hashCode(name.toLowerCase()+"|"+JSON.stringify(r.finalDim)+"|"+r.overall+"|"+gap);
+  return `${openings[focus]} ${bridges[strength]} ${endings[seed%endings.length]}`;
+}
+
+
+function growthExperiment(dim, score, gap, strengths){
+  const experiments={
+    SA:{
+      title:"The 7-Day Emotion Name-and-Notice Experiment",
+      ca:"Before a difficult client call, review meeting or study session, write: “I am feeling ___ because ___.” Afterward write: “My emotion changed my behaviour by ___.”",
+      life:"Use the same 10-second check before a difficult family or personal conversation.",
+      why:"The aim is to create a small gap between emotion, interpretation and behaviour."
+    },
+    SR:{
+      title:"The 10-Second Pause Experiment",
+      ca:"For one week, when you receive criticism, a difficult email or an unexpected work request, do not answer immediately. Take one breath, identify the emotion, then choose your response.",
+      life:"Use the same pause when a personal conversation starts becoming heated.",
+      why:"The goal is not to suppress emotion. It is to prevent an automatic reaction from choosing your behaviour."
+    },
+    EM:{
+      title:"The One-Curiosity-Question Experiment",
+      ca:"For seven days, ask one genuine question before judging a colleague, senior, client or junior. Example: “What is making this difficult from your side?”",
+      life:"Use one curiosity question in a personal conversation where you are tempted to assume what the other person means.",
+      why:"The practice shifts you from mind-reading to information gathering."
+    },
+    RM:{
+      title:"The Assertive Sentence Experiment",
+      ca:"Use this structure once each day when needed: “When ___ happens, the impact is ___. I would prefer/request ___.” Practise it in a low-stakes professional conversation first.",
+      life:"Use the same structure for a personal boundary without blame or accusation.",
+      why:"The goal is to be clear without becoming aggressive or passive."
+    },
+    DM:{
+      title:"Facts vs Story Experiment",
+      ca:"Before one important professional decision, make two columns: FACTS I KNOW / STORY I AM TELLING MYSELF. Make the decision only after separating the two.",
+      life:"Use the same method before a personal decision that is emotionally charged.",
+      why:"The practice helps you notice when emotion is supplying assumptions that feel like facts."
+    }
+  };
+  return experiments[dim];
+}
+
+function buildResult(){
+  const name=document.getElementById("studentName").value.trim();
+  const id=document.getElementById("studentId").value.trim();
+  const r=scoreAssessment();
+  const [lv,desc]=level(r.overall);
+  const sorted=Object.entries(r.finalDim).sort((a,b)=>b[1]-a[1]);
+  const strengths=sorted.slice(0,2);
+  const dev=sorted.slice(-2).reverse();
+  const gap=r.selfAll-r.sjtAll;
+  let gapText="";
+  if(gap>=10) gapText="Your self-perception is higher than your situational judgement. Treat this as a useful reflection point, not a verdict: practise turning what you know into behaviour under pressure.";
+  else if(gap<=-10) gapText="Your situational judgement is stronger than your self-perception. You may be underestimating some of your interpersonal strengths.";
+  else gapText="Your self-perception and situational judgement are reasonably aligned, suggesting a useful level of self-calibration.";
+  const mantra=makeMantra(name,r);
+
+  let bars="";
+  sorted.forEach(([d,s])=>{bars+=`<div class="barrow"><div class="barlabel"><span>${dimensions[d]}</span><span>${s}%</span></div><div class="bar"><div class="fill" style="width:${s}%"></div></div></div>`});
+
+  const advice={
+    SA:"Keep a short trigger log: situation → emotion → thought → response. Look for repeated patterns.",
+    SR:"Use a 10-second pause before difficult replies. Name the emotion, lower the intensity, then choose the behaviour.",
+    EM:"Ask one curiosity question before forming a conclusion about another person's behaviour.",
+    RM:"Practise assertive language: observation → impact → need/request. Keep the person separate from the problem.",
+    DM:"Before a high-stakes decision, write two columns: facts I know / story I am telling myself."
+  };
+
+  document.getElementById("result").innerHTML=`
+    <div class="card result-head">
+      <div class="small">PERSONAL REPORT • ${new Date().toLocaleDateString()}</div>
+      <h2>${escapeHtml(name)}${id?` • ${escapeHtml(id)}`:""}</h2>
+      <div class="score">${r.overall}%</div>
+      <div class="level">${lv}</div><p><b>This is a reflection index, not a label.</b></p>
+      <p>${desc}</p>
+    </div>
+    <div class="card">
+      <h2>Your two lenses</h2>
+      <div class="result-grid">
+        <div class="mini"><h3>Self-Perceived EQ</h3><div class="score" style="font-size:34px">${r.selfAll}%</div><p class="small">How strongly you believe you use these emotional skills in everyday life.</p></div>
+        <div class="mini"><h3>Situational EI</h3><div class="score" style="font-size:34px">${r.sjtAll}%</div><p class="small">How effectively your chosen responses handle emotional and interpersonal workplace situations.</p></div>
+      </div>
+      <p><b>Calibration:</b> ${gapText}</p>
+    </div>
+    <div class="card"><h2>Your five-dimensional profile</h2><div class="bars">${bars}</div></div>
+    <div class="card">
+      <h2>What stands out</h2>
+      <div class="result-grid">
+        <div class="mini"><h3>🌟 Your strengths</h3><p><b>${dimensions[strengths[0][0]]}</b> (${strengths[0][1]}%)<br>${dimensions[strengths[1][0]]} (${strengths[1][1]}%)</p></div>
+        <div class="mini"><h3>🎯 Development focus</h3><p><b>${dimensions[dev[0][0]]}</b> (${dev[0][1]}%)<br>${dimensions[dev[1][0]]} (${dev[1][1]}%)</p></div>
+      </div>
+      <p><b>Try this next:</b> ${advice[dev[0][0]]}</p>
+    </div>
+    <div class="card">
+      <h2>🌱 Your 7-Day Growth Experiment</h2>
+      <h3>${growthExperiment(dev[0][0],dev[0][1],gap,strengths).title}</h3>
+      <p><b>In your CA journey:</b> ${growthExperiment(dev[0][0],dev[0][1],gap,strengths).ca}</p>
+      <p><b>In your personal life:</b> ${growthExperiment(dev[0][0],dev[0][1],gap,strengths).life}</p>
+      <p class="small"><b>Why this experiment?</b> ${growthExperiment(dev[0][0],dev[0][1],gap,strengths).why}</p>
+      <p><b>At the end of 7 days, ask yourself:</b> What changed when I changed my response by just a few seconds?</p>
+    </div>
+    <div class="card">
+      <h2>🪞 Your Perception Check</h2>
+      <p>Before your next difficult interaction, ask:</p>
+      <div class="mantra">“What happened, what am I assuming, and what might the other person be experiencing?”</div>
+      <p class="small">This question is especially useful when your emotions are strong because perception can influence tone, language and behaviour.</p>
+    </div>
+    <div class="card">
+      <h2>📅 Your 30-Day CA + Life Experiment</h2>
+      <p>Choose one small behaviour from your report and practise it repeatedly for 30 days. Track <b>trigger → response → result</b> once a day.</p>
+      <ul>
+        <li><b>CA journey:</b> Use it in one client, senior, junior, team or study interaction each day.</li>
+        <li><b>Personal life:</b> Use the same skill once a day in a conversation where patience, boundaries or perspective-taking matters.</li>
+        <li><b>Weekly review:</b> Ask “What did I do differently? What changed in the other person's response? What will I repeat?”</li>
+      </ul>
+    </div>
+    <div class="card"><h2>Your personal motivation mantra</h2><div class="mantra">“${mantra}”</div><p class="small" style="text-align:center">This line is generated from your response profile. It is intended as a personal reflection cue, not a psychological prediction.</p></div>
+    <div class="card">
+      <h2>Your reflection</h2>
+      <p><b>Situation I want to handle better:</b><br>${escapeHtml(document.getElementById("reflection1").value||"Not provided.")}</p>
+      <p><b>Interpersonal habit I want to improve:</b><br>${escapeHtml(document.getElementById("reflection2").value||"Not provided.")}</p>
+    </div>
+    <div class="card">
+      <h2>🌿 Remember</h2>
+      <div class="mantra">“This assessment is not here to tell you who you are. It is here to show you where you can grow.”</div>
+      <p><b>Designed by CA Inderpreet Kaur</b></p>
+      <p class="small">Original educational assessment created for classroom learning and self-reflection. It is not the EQ-i, MSCEIT or another proprietary/validated clinical instrument. Results are learning indicators, not psychological diagnoses.</p>
+      <p class="small">The cases and scoring logic are original classroom content informed by established concepts in emotional intelligence, self-awareness, emotion regulation, empathy, interpersonal effectiveness and situational judgement.</p>
+    </div>
+    <div class="actions no-print"><button class="print" onclick="window.print()">Print / Save as PDF</button><button class="secondary" onclick="location.reload()">Start Again</button></div>
+  `;
+  document.getElementById("assessment").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+
+document.getElementById("assessment").addEventListener("submit",e=>{
+  e.preventDefault();
+  buildResult();
+});
+</script>
+</body>
+</html>
